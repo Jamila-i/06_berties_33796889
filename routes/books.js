@@ -74,5 +74,26 @@ router.get("/list", function (req, res, next) {
   });
 });
 
+/* ---------------------------------------------------------
+   BARGAIN BOOKS PAGE
+   --------------------------------------------------------- */
+
+// List books priced less than £20
+router.get("/bargainbooks", function (req, res, next) {
+  let sqlquery = "SELECT * FROM books WHERE price < 20";
+
+  db.query(sqlquery, (err, result) => {
+    if (err) {
+      return next(err);
+    }
+
+    // Render the bargains.ejs page
+    res.render("bargains.ejs", {
+      shopData: req.app.locals.shopData,
+      books: result,
+    });
+  });
+});
+
 // Allows index.js to use all routes defined here
 module.exports = router;

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title><%= shopData.shopName %> – Bargain Books</title>
+    <link rel="stylesheet" href="/main.css" />
+  </head>
+
+  <body>
+    <h1>Bargain Books (Under £20)</h1>
+
+    <% if (books.length === 0) { %>
+
+    <p>No bargain books available.</p>
+
+    <% } else { %>
+
+    <table border="1" cellpadding="8" cellspacing="0">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Title</th>
+          <th>Price (£)</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <% books.forEach(function(book) { %>
+        <tr>
+          <td><%= book.id %></td>
+          <td><%= book.name %></td>
+          <td><%= book.price %></td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+
+    <% } %>
+
+    <!-- Navigation links -->
+    <p><a href="/">Back to home</a></p>
+    <p><a href="/books/list">Back to book list</a></p>
+  </body>
+</html>
