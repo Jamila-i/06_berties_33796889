@@ -11,10 +11,31 @@ router.get("/search", function (req, res, next) {
   res.render("search.ejs");
 });
 
-// Handle the search form results
+/* ---------------------------------------------------------
+   SEARCH RESULTS (advanced: partial title match)
+   --------------------------------------------------------- */
+
 router.get("/search-result", function (req, res, next) {
-  //searching in the database
-  res.send("You searched for: " + req.query.keyword);
+  // Get the search keyword from the query string
+  const keyword = req.query.keyword;
+
+  // Advanced search: find titles that contain the keyword anywhere
+  let sqlquery = "SELECT * FROM books WHERE name LIKE ?";
+
+  // Wrap keyword with % for partial match
+  const searchTerm = "%" + keyword + "%";
+
+  db.query(sqlquery, [searchTerm], (err, result) => {
+    if (err) {
+      return next(err);
+    }
+
+    res.render("searchresults.ejs", {
+      shopData: req.app.locals.shopData,
+      books: result,
+      keyword: keyword,
+    });
+  });
 });
 
 /* ---------------------------------------------------------
