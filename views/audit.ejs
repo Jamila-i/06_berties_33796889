@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Audit Log – <%= shopData.shopName %></title>
+    <link rel="stylesheet" href="/main.css" />
+  </head>
+
+  <body>
+    <h1>Login Audit Log</h1>
+
+    <% if (audit.length === 0) { %>
+
+    <p>No login attempts recorded yet.</p>
+
+    <% } else { %>
+
+    <table border="1" cellpadding="8" cellspacing="0">
+      <thead>
+        <tr>
+          <th>Username</th>
+          <th>Success</th>
+          <th>Time</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <% audit.forEach(function(entry) { %>
+        <tr>
+          <td><%= entry.username %></td>
+          <td><%= entry.success ? "Successful" : "Failed" %></td>
+          <td><%= entry.timestamp %></td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+
+    <% } %>
+
+    <p><a href="/">Back to home</a></p>
+  </body>
+</html>

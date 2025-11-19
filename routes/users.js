@@ -1,15 +1,144 @@
 // Create a new router
-const express = require("express")
-const router = express.Router()
+const express = require("express");
+const router = express.Router();
+const bcrypt = require("bcrypt");
+const saltRounds = 10;
 
-router.get('/register', function (req, res, next) {
-    res.render('register.ejs')
-})
+router.get("/register", function (req, res, next) {
+  res.render("register.ejs", {
+    shopData: req.app.locals.shopData,
+  });
+});
 
-router.post('/registered', function (req, res, next) {
-    // saving data in database
-    res.send(' Hello '+ req.body.first + ' '+ req.body.last +' you are now registered!  We will send an email to you at ' + req.body.email);                                                                              
-}); 
+// Show login page
+router.get("/login", function (req, res, next) {
+  res.render("login.ejs", {
+    shopData: req.app.locals.shopData,
+  });
+});
+
+router.post("/registered", function (req, res, next) {
+  //console.log("BODY RECEIVED:", req.body);
+
+  const plainPassword = req.body.password;
+
+  // Hash the password
+  bcrypt.hash(plainPassword, saltRounds, function (err, hashedPassword) {
+    if (err) {
+      return next(err);
+    }
+
+    // SQL to insert new user
+    const sqlquery =
+      "INSERT INTO users (username, firstname, lastname, email, hashedPassword) VALUES (?, ?, ?, ?, ?)";
+
+    const newUser = [
+      req.body.username,
+      req.body.first,
+      req.body.last,
+      req.body.email,
+      hashedPassword,
+    ];
+
+    // Store in database
+    db.query(sqlquery, newUser, function (err, result) {
+      if (err) {
+        return next(err);
+      }
+
+      let resultMessage = "";
+      resultMessage +=
+        "Hello " +
+        req.body.first +
+        " " +
+        req.body.last +
+        ", you are now registered! ";
+      resultMessage +=
+        "We will send an email to you at " + req.body.email + "<br><br>";
+      resultMessage += "Your password is: " + req.body.password + "<br>";
+      resultMessage += "Your hashed password is: " + hashedPassword + "<br>";
+
+      res.send(resultMessage);
+    });
+  });
+});
+
+// Handle login form submission
+router.post("/loggedin", function (req, res, next) {
+  const username = req.body.username;
+  const password = req.body.password;
+
+  const sqlquery = "SELECT * FROM users WHERE username = ?";
+
+  db.query(sqlquery, [username], function (err, results) {
+    if (err) {
+      return next(err);
+    }
+
+    // No user found with that username
+    if (results.length === 0) {
+      logAttempt(username, false);
+      return res.send("Login failed: user not found.");
+    }
+
+    const storedHash = results[0].hashedPassword;
+
+    bcrypt.compare(password, storedHash, function (err, match) {
+      if (err) {
+        return next(err);
+      }
+
+      if (match) {
+        logAttempt(username, true);
+        res.send("Login successful. Welcome " + username + "!");
+      } else {
+        logAttempt(username, false);
+        res.send("Login failed: incorrect password.");
+      }
+    });
+  });
+});
+
+router.get("/list", function (req, res, next) {
+  const sql = "SELECT username, firstname, lastname, email FROM users";
+
+  db.query(sql, function (err, results) {
+    if (err) {
+      return next(err);
+    }
+
+    res.render("userlist.ejs", {
+      users: results,
+      shopData: req.app.locals.shopData,
+    });
+  });
+});
+
+// Show audit log of login attempts
+router.get("/audit", function (req, res, next) {
+  const sql = "SELECT * FROM audit_log ORDER BY timestamp DESC";
+
+  db.query(sql, function (err, results) {
+    if (err) {
+      return next(err);
+    }
+
+    res.render("audit.ejs", {
+      audit: results,
+      shopData: req.app.locals.shopData,
+    });
+  });
+});
+
+// Log login attempts to the audit_log table
+function logAttempt(username, success) {
+  const sql = "INSERT INTO audit_log (username, success) VALUES (?, ?)";
+  db.query(sql, [username, success], function (err, result) {
+    if (err) {
+      console.error("Error logging attempt:", err);
+    }
+  });
+}
 
 // Export the router object so index.js can access it
-module.exports = router
+module.exports = router;

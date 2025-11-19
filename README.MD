@@ -45,6 +45,22 @@ Built for **Dynamic Web Applications – Lab 6**.
 └── insert_test_data.sql    # Inserts sample dataset
 ```
 
+## dotenv
+
+I used the dotenv package to secure my database credentials instead of storing
+them directly in the code.
+
+I created a `.env` file that contains the variables:
+
+BB_USER
+BB_PASSWORD
+BB_DATABASE
+BB_HOST
+
+The MySQL connection in `index.js` reads these using process.env so no credentials are pushed to GitHub.
+
+My `.env` file is included in `.gitignore` so it stays private.
+
 ## How to run it
 
 1. Install dependencies
