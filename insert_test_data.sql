@@ -2,8 +2,12 @@
 
 USE berties_books;
 
--- Insert books safely, skipping duplicates
-INSERT IGNORE INTO books (name, price) VALUES
+-- Clear existing rows to avoid duplicates
+DELETE FROM books;
+DELETE FROM users;
+
+-- Insert books
+INSERT INTO books (name, price) VALUES
 ('Brighton Rock', 20.25),
 ('Brave New World', 25.00),
 ('Animal Farm', 12.99),
@@ -12,7 +16,7 @@ INSERT IGNORE INTO books (name, price) VALUES
 ('The Great Gatsby', 16.75),
 ('The Kite Runner', 12.00);
 
--- Insert user safely, skipping duplicates
-INSERT IGNORE INTO users (username, firstname, lastname, email, hashedPassword)
+-- Insert user
+INSERT INTO users (username, firstname, lastname, email, hashedPassword)
 VALUES
 ('gold', 'Gold', 'User', 'gold@example.com', '$2b$10$w6i9.dMfH.C7pY3bvYknveEXkc7SMQIqCYwX0ZKKOlrdp/mi2Chj.');
