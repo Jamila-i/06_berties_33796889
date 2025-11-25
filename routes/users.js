@@ -4,6 +4,15 @@ const router = express.Router();
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
 
+// Middleware to restrict access to logged-in users
+const redirectLogin = (req, res, next) => {
+  if (!req.session.userId) {
+    res.redirect("./login"); // redirect to the login page if no session userId
+  } else {
+    next(); // move to the next middleware function
+  }
+};
+
 router.get("/register", function (req, res, next) {
   res.render("register.ejs", {
     shopData: req.app.locals.shopData,
@@ -89,8 +98,13 @@ router.post("/loggedin", function (req, res, next) {
       }
 
       if (match) {
+        // Save user session here, when login is successful
+        req.session.userId = username;
+
         logAttempt(username, true);
-        res.send("Login successful. Welcome " + username + "!");
+        res.send(
+          "Login successful. Welcome " + username + "!<br><a href='/'>Home</a>"
+        );
       } else {
         logAttempt(username, false);
         res.send("Login failed: incorrect password.");
@@ -99,7 +113,7 @@ router.post("/loggedin", function (req, res, next) {
   });
 });
 
-router.get("/list", function (req, res, next) {
+router.get("/list", redirectLogin, function (req, res, next) {
   const sql = "SELECT username, firstname, lastname, email FROM users";
 
   db.query(sql, function (err, results) {
@@ -115,7 +129,7 @@ router.get("/list", function (req, res, next) {
 });
 
 // Show audit log of login attempts
-router.get("/audit", function (req, res, next) {
+router.get("/audit", redirectLogin, function (req, res, next) {
   const sql = "SELECT * FROM audit_log ORDER BY timestamp DESC";
 
   db.query(sql, function (err, results) {

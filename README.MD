@@ -75,6 +75,35 @@ successful logins as well as failed attempts (wrong password or unknown user).
 There is also a `/users/audit` route and `audit.ejs` view which display the
 full login history in a table for debugging and security monitoring.
 
+## Access Control (Authorisation)
+
+This application uses session-based access control with a `redirectLogin` middleware. The middleware checks whether `req.session.userId` exists and redirects unauthenticated users to the login page.
+
+### Public Routes (No Login Required)
+
+- `/`
+- `/about`
+- `/users/register`
+- `/users/login`
+- `/books/search`
+- `/books/search-result`
+
+These routes stay open so visitors can browse, search for books, or create an account.
+
+### Protected Routes (Login Required)
+
+- `/books/list`
+- `/books/addbook`
+- `/books/bookadded`
+- `/books/bargainbooks`
+- `/users/list`
+- `/users/audit`
+- `/logout`
+
+These pages contain user data or allow database changes, so only authenticated users can access them.
+
+If a non-logged-in user tries to access a protected route, the `redirectLogin` middleware automatically redirects them to `/users/login`.
+
 ## How to run it
 
 1. Install dependencies
