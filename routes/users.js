@@ -92,8 +92,9 @@ router.post(
 
 // Handle login form submission
 router.post("/loggedin", function (req, res, next) {
-  const username = req.body.username;
-  const password = req.body.password;
+  // sanitise login fields
+  const username = req.sanitize(req.body.username);
+  const password = req.sanitize(req.body.password);
 
   const sqlquery = "SELECT * FROM users WHERE username = ?";
 
