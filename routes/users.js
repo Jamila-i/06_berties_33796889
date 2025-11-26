@@ -29,6 +29,15 @@ router.get("/login", function (req, res, next) {
 
 router.post(
   "/registered",
+
+  (req, res, next) => {
+    req.body.first = req.sanitize(req.body.first);
+    req.body.last = req.sanitize(req.body.last);
+    req.body.username = req.sanitize(req.body.username);
+    req.body.email = req.sanitize(req.body.email);
+    next();
+  },
+
   [
     check("email").isEmail(),
     check("username").isLength({ min: 5, max: 20 }),
@@ -36,53 +45,40 @@ router.post(
     check("first").notEmpty(),
     check("last").notEmpty(),
   ],
+
   function (req, res, next) {
     const errors = validationResult(req);
-
-    // Debug: log any validation errors
     console.log("Validation errors:", errors.array());
 
     if (!errors.isEmpty()) {
-      // If email or username fails validation, reload the registration page
-      return res.render("register.ejs", {
-        shopData: req.app.locals.shopData,
-      });
+      return res.redirect("/users/register");
     }
 
-    // If we reach here, validation passed
+    const first = req.body.first;
+    const last = req.body.last;
+
     const plainPassword = req.body.password;
 
-    // Hash the password
     bcrypt.hash(plainPassword, saltRounds, function (err, hashedPassword) {
-      if (err) {
-        return next(err);
-      }
+      if (err) return next(err);
 
-      // SQL to insert new user
       const sqlquery =
         "INSERT INTO users (username, firstname, lastname, email, hashedPassword) VALUES (?, ?, ?, ?, ?)";
 
       const newUser = [
         req.body.username,
-        req.body.first,
-        req.body.last,
+        first,
+        last,
         req.body.email,
         hashedPassword,
       ];
 
-      // Store in database
       db.query(sqlquery, newUser, function (err, result) {
-        if (err) {
-          return next(err);
-        }
+        if (err) return next(err);
 
         let resultMessage = "";
         resultMessage +=
-          "Hello " +
-          req.body.first +
-          " " +
-          req.body.last +
-          ", you are now registered! ";
+          "Hello " + first + " " + last + ", you are now registered! ";
         resultMessage +=
           "We will send an email to you at " + req.body.email + "<br><br>";
         resultMessage += "Your password is: " + req.body.password + "<br>";
