@@ -35,6 +35,7 @@ router.post(
     req.body.last = req.sanitize(req.body.last);
     req.body.username = req.sanitize(req.body.username);
     req.body.email = req.sanitize(req.body.email);
+    req.body.password = req.sanitize(req.body.password);
     next();
   },
 
@@ -56,7 +57,6 @@ router.post(
 
     const first = req.body.first;
     const last = req.body.last;
-
     const plainPassword = req.body.password;
 
     bcrypt.hash(plainPassword, saltRounds, function (err, hashedPassword) {
