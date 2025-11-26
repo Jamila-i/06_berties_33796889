@@ -3,6 +3,7 @@ const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
+const { check, validationResult } = require("express-validator");
 
 // Middleware to restrict access to logged-in users
 const redirectLogin = (req, res, next) => {
@@ -26,51 +27,66 @@ router.get("/login", function (req, res, next) {
   });
 });
 
-router.post("/registered", function (req, res, next) {
-  //console.log("BODY RECEIVED:", req.body);
+router.post(
+  "/registered",
+  [check("email").isEmail(), check("username").isLength({ min: 5, max: 20 })],
+  function (req, res, next) {
+    const errors = validationResult(req);
 
-  const plainPassword = req.body.password;
+    // Debug: log any validation errors
+    console.log("Validation errors:", errors.array());
 
-  // Hash the password
-  bcrypt.hash(plainPassword, saltRounds, function (err, hashedPassword) {
-    if (err) {
-      return next(err);
+    if (!errors.isEmpty()) {
+      // If email or username fails validation, reload the registration page
+      return res.render("register.ejs", {
+        shopData: req.app.locals.shopData,
+      });
     }
 
-    // SQL to insert new user
-    const sqlquery =
-      "INSERT INTO users (username, firstname, lastname, email, hashedPassword) VALUES (?, ?, ?, ?, ?)";
+    // If we reach here, validation passed
+    const plainPassword = req.body.password;
 
-    const newUser = [
-      req.body.username,
-      req.body.first,
-      req.body.last,
-      req.body.email,
-      hashedPassword,
-    ];
-
-    // Store in database
-    db.query(sqlquery, newUser, function (err, result) {
+    // Hash the password
+    bcrypt.hash(plainPassword, saltRounds, function (err, hashedPassword) {
       if (err) {
         return next(err);
       }
 
-      let resultMessage = "";
-      resultMessage +=
-        "Hello " +
-        req.body.first +
-        " " +
-        req.body.last +
-        ", you are now registered! ";
-      resultMessage +=
-        "We will send an email to you at " + req.body.email + "<br><br>";
-      resultMessage += "Your password is: " + req.body.password + "<br>";
-      resultMessage += "Your hashed password is: " + hashedPassword + "<br>";
+      // SQL to insert new user
+      const sqlquery =
+        "INSERT INTO users (username, firstname, lastname, email, hashedPassword) VALUES (?, ?, ?, ?, ?)";
 
-      res.send(resultMessage);
+      const newUser = [
+        req.body.username,
+        req.body.first,
+        req.body.last,
+        req.body.email,
+        hashedPassword,
+      ];
+
+      // Store in database
+      db.query(sqlquery, newUser, function (err, result) {
+        if (err) {
+          return next(err);
+        }
+
+        let resultMessage = "";
+        resultMessage +=
+          "Hello " +
+          req.body.first +
+          " " +
+          req.body.last +
+          ", you are now registered! ";
+        resultMessage +=
+          "We will send an email to you at " + req.body.email + "<br><br>";
+        resultMessage += "Your password is: " + req.body.password + "<br>";
+        resultMessage += "Your hashed password is: " + hashedPassword + "<br>";
+
+        res.send(resultMessage);
+      });
     });
-  });
-});
+  }
+);
 
 // Handle login form submission
 router.post("/loggedin", function (req, res, next) {
