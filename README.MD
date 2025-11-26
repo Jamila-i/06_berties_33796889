@@ -104,6 +104,34 @@ These pages contain user data or allow database changes, so only authenticated u
 
 If a non-logged-in user tries to access a protected route, the `redirectLogin` middleware automatically redirects them to `/users/login`.
 
+## Validation
+
+I added server-side validation to several parts of the application using `express-validator` to ensure data is safe and correct before it is stored in the database.
+
+### Registration Page (users.js)
+
+I added validation for:
+
+- **Email** – must be a valid email format (`isEmail()`).
+- **Username** – must be between 5 and 20 characters (`isLength()`).
+- **Password** – must be at least 8 characters long (`isLength()`).
+- **First name / Last name** – cannot be empty (`notEmpty()`).
+
+These fields are sensitive or user-identifying, so validating them prevents malformed accounts, accidental user errors, and improves the security of login credentials.
+
+---
+
+### Add Book Page (books.js)
+
+I added validation for:
+
+- **Book name** – must not be empty (`notEmpty()`).
+- **Price** – must be a number and 0 or higher (`isFloat({ min: 0 })`).
+
+Only valid book data should enter the database. A missing title or invalid price would corrupt the books table or cause display issues in the UI.
+
+---
+
 ## How to run it
 
 1. Install dependencies
