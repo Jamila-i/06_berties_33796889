@@ -5,7 +5,7 @@ const router = express.Router();
 // Middleware to restrict access to logged-in users
 const redirectLogin = (req, res, next) => {
   if (!req.session.userId) {
-    res.redirect("/users/login"); // redirect to the login page if no session userId
+    res.redirect("../users/login"); // redirect to the login page if no session userId
   } else {
     next(); // move to the next middleware function
   }
