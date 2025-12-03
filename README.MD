@@ -215,6 +215,172 @@ No sanitisation needed because no user data is submitted.
 
 This approach provides strong protection against XSS while keeping the application efficient and secure.
 
+# Weather Feature
+
+I added a simple weather feature using the OpenWeatherMap API.
+Users can enter any city and the app fetches real-time weather data such as temperature, humidity, wind speed, and a short description.
+
+## /weather (Interactive Page)
+
+This page contains a small form where the user types a city name.
+The server requests weather data from OpenWeatherMap and displays it in a formatted “weather card”.
+
+The page includes:
+
+- Temperature (°C)
+- Feels-like temperature
+- Humidity
+- Wind speed
+- Weather description (e.g., “cloudy”, “fog”, etc.)
+
+The route also includes friendly error handling for:
+
+- Invalid or unknown city names
+- Empty form submissions
+- Unexpected API responses
+
+## /weather/now (Simple API Test Route)
+
+This route was used to test the external API during development:
+
+```
+/weather/now
+```
+
+It automatically retrieves the weather for London and returns a short text message.
+It also includes basic error checking (e.g., unreadable JSON or missing fields).
+
+# API Documentation
+
+Below is a concise overview of the JSON API added to Bertie’s Books.  
+All endpoints return **pure JSON** and do **not** require a login.
+
+---
+
+## GET /api/books
+
+Returns all books in JSON format.
+
+### Example
+
+# /api/books
+
+**Sample Response:**
+
+```json
+[
+  { "id": 1, "name": "Brighton Rock", "price": 20.25 },
+  { "id": 2, "name": "Brave New World", "price": 25.0 }
+]
+```
+
+## API Filters and Options (Search, Price Range, Sorting)
+
+The /api/books route also supports several optional query parameters.
+These allow clients to narrow down the results or change the order of the returned books.
+
+All filters can be used on their own or combined.
+
+1. Searching for books
+   You can search for books by including a search keyword:
+
+```
+/api/books?search=animal
+```
+
+This returns all books that contain the given word or phrase in their title.
+
+2. Filtering by price range
+   You can filter books by specifying:
+
+- a minimum price,
+- a maximum price,
+- or both.
+
+### Examples
+
+```
+/api/books?minprice=10
+
+/api/books?max_price=20
+
+/api/books?minprice=10&max_price=20
+```
+
+This makes the endpoint more flexible, especially for shops or apps that only want books within a certain budget range.
+
+3. Sorting results
+   There is also a simple sorting feature:
+
+```
+/api/books?sort=name
+```
+
+or
+
+```
+/api/books?sort=price
+```
+
+Sorting works together with all other filters, so users can get results in the format that suits them best.
+
+## Combined Example
+
+Here is an example that uses all filters together:
+
+```
+/api/books?search=br&minprice=10&max_price=30&sort=price
+```
+
+This will:
+
+- search for books containing "br"
+- only include those priced between £10 and £30
+- and then sort the final list by price (low to high)
+
+### Sample Response
+
+```json
+{
+  "search": "br",
+  "minprice": 10,
+  "max_price": 30,
+  "sort": "price",
+  "count": 2,
+  "results": [
+    { "id": 1, "name": "Brighton Rock", "price": 20.25 },
+    { "id": 2, "name": "Brave New World", "price": 25.0 }
+  ]
+}
+```
+
+## Legacy Search Route
+
+There is also an older endpoint:
+
+```
+/api/books/search?keyword=world
+```
+
+This was created while completing the earlier tasks. It does the same job as search= on /api/books, but /api/books?search= is now the preferred version.
+
+## Error Handling
+
+The API always returns JSON, even when something goes wrong.
+For example, if a query is missing required data, or if the database returns an error, you’ll see JSON like this:
+
+```
+{ "error": "Please provide a search keyword using ?keyword=..." }
+```
+
+or:
+
+```
+{ "error": { "code": "...", "message": "..." } }
+```
+
+This ensures that clients can always process the response consistently.
+
 ## How to run it
 
 1. Install dependencies
