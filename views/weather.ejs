@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Weather – <%= shopData.shopName %></title>
+    <link rel="stylesheet" href="/main.css" />
+  </head>
+
+  <body>
+    <h1>Weather search</h1>
+
+    <!-- Search form -->
+    <form method="POST" action="/weather">
+      <p>
+        Enter a city:
+        <input type="text" name="city" placeholder="e.g. London" required />
+        <button type="submit">Get weather</button>
+      </p>
+    </form>
+
+    <!-- Error message -->
+    <% if (error) { %>
+    <p class="error"><%= error %></p>
+    <% } %>
+
+    <!-- Weather card with extra info -->
+    <% if (weatherData) { %>
+    <div class="weather-card">
+      <h2>Current weather in <%= weatherData.city %></h2>
+      <ul class="weather-details">
+        <li>
+          <strong>Temperature:</strong>
+          <%= weatherData.temp %> °C (feels like <%= weatherData.feelsLike %>
+          °C)
+        </li>
+        <li>
+          <strong>Humidity:</strong>
+          <%= weatherData.humidity %> percent
+        </li>
+        <% if (weatherData.windSpeed !== null) { %>
+        <li>
+          <strong>Wind speed:</strong>
+          <%= weatherData.windSpeed %> m/s
+        </li>
+        <% } %>
+        <li>
+          <strong>Description:</strong>
+          <%= weatherData.description %>
+        </li>
+      </ul>
+    </div>
+    <% } %>
+
+    <p><a href="/">Back to home</a></p>
+  </body>
+</html>
