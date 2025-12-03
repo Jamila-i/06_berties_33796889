@@ -16,7 +16,7 @@ router.get("/", function (req, res) {
 // Handle form submission and show weather for the chosen city
 router.post("/", function (req, res, next) {
   const city = req.body.city;
-  const apiKey = "82c34dc7df8771d5b0a94bb6548dc69d";
+  const apiKey = process.env.WEATHER_API_KEY;
 
   if (!city) {
     return res.render("weather.ejs", {
@@ -80,7 +80,7 @@ router.post("/", function (req, res, next) {
 
 // GET /weather/now
 router.get("/now", function (req, res, next) {
-  let apiKey = "82c34dc7df8771d5b0a94bb6548dc69d";
+  let apiKey = process.env.WEATHER_API_KEY;
   let city = "london";
 
   let url = `http://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}`;
